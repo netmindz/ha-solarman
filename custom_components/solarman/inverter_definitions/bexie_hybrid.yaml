@@ -1,18 +1,30 @@
 #
 # Bexie | Hybrid Inverter | Single Phase | LV Battery | 2 MPPT
 #
+# https://bexieenergy.com/product/be3-6-6kw-1ph/
+#
 # Reference: https://github.com/user-attachments/files/17295986/Hybrid.Modbus.Protocol.per.inverter.ibridi.pdf
 # Register map closely matches CHINT CPS-SCETL pattern (same Modbus protocol document).
-#
-# Confirmed register blocks via live Modbus TCP scan (port 502) at 192.168.178.134:
-#   0x1010 - 0x104C  FC03  Real Time Data (PV / inverter)
-#   0x1300 - 0x1338  FC03  Real Time Data (grid / load)
-#   0x2000 - 0x200F  FC03  Battery data
 #
 # Notes:
 #   - 32-bit registers use inverted word order: [high_addr, low_addr] (same as CHINT)
 #   - Battery Temperature: 0x201B confirmed (0x2001 returns 0 on this device)
 #   - Battery Power: 0x200A/0x2009 pair confirmed (781W @ 52.7V / 14.81A)
+#
+# Differences from CHINT CPS-SCETL:
+#   1. Single phase only — no L1/L2/L3 output, grid current, or per-phase load entities.
+#   2. 2 MPPTs only — CHINT supports up to 9; PV3–PV9 entries are absent here.
+#   3. Battery Temperature uses 0x201B (unsigned 16, rule 1); CHINT uses 0x2001
+#      (signed 16, rule 2). Register 0x2001 returns 0 on this device.
+#   4. Battery Power is a single signed 16-bit register at 0x200A (rule 2);
+#      CHINT reads an unsigned 32-bit pair [0x200A, 0x2009] (rule 3).
+#   5. Writable control registers added (0x2100+): Work Mode (select),
+#      Grid Charge (switch), Grid Charge End SOC (number). Not present in CHINT profile.
+#   6. Inverter Mode sensor added (0x101D). Not present in CHINT profile.
+#   7. No device info block (0x1A00+) — not confirmed available on this device.
+#   8. No EPS group — not available on this model.
+#   9. No fault registers — 0x101E–0x1020 and 0x2013 not yet confirmed on this device.
+#  10. Default update_interval is 30 s (CHINT uses 60 s).
 #
 
 info:
