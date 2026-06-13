@@ -1,3 +1,4 @@
+import asyncio
 from logging import getLogger
 from datetime import datetime, timedelta
 
@@ -73,7 +74,10 @@ class Device():
         if self.modbus:
             await self.modbus.close()
         if self._proxy:
-            await self._proxy.stop()
+            try:
+                await asyncio.wait_for(self._proxy.stop(), timeout=5.0)
+            except asyncio.TimeoutError:
+                _LOGGER.warning(f"[{self.endpoint.host}] Modbus proxy stop timed out, forcing close")
             self._proxy = None
 
     async def execute(self, code, address, **kwargs):
