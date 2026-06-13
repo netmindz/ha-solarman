@@ -33,6 +33,8 @@ CONF_PACK = "pack"
 CONF_BATTERY_NOMINAL_VOLTAGE = "battery_nominal_voltage"
 CONF_BATTERY_LIFE_CYCLE_RATING = "battery_life_cycle_rating"
 CONF_MB_SLAVE_ID = "mb_slave_id"
+CONF_PROXY_ENABLED = "proxy_enabled"
+CONF_PROXY_PORT = "proxy_port"
 
 OLD_ = { "name": "name", "serial": "inverter_serial", "sn": "serial", "sn": "sn", CONF_HOST: "inverter_host", CONF_PORT: "inverter_port" }
 
@@ -65,6 +67,8 @@ DEFAULT_ = {
     CONF_PACK: -1,
     CONF_BATTERY_NOMINAL_VOLTAGE: 48,
     CONF_BATTERY_LIFE_CYCLE_RATING: 6000,
+    CONF_PROXY_ENABLED: False,
+    CONF_PROXY_PORT: 1502,
     UPDATE_INTERVAL: 60,
     IS_SINGLE_CODE: False,
     REGISTERS_CODE: 0x03,

@@ -39,12 +39,24 @@ class Device():
         self.endpoint: EndPointProvider | None = None
         self.profile: ProfileProvider | None = None
         self.modbus: Solarman | None = None
+        self._proxy = None
         self.state = DeviceState()
         self.info = {}
+
+    async def _start_proxy(self):
+        from modbus_proxy import ModBus
+        self._proxy = ModBus({
+            "modbus": {"url": f"tcp://{self.endpoint.host}:{self.endpoint.port}"},
+            "listen": {"bind": f"tcp://0.0.0.0:{self.config.proxy_port}"}
+        })
+        await self._proxy.start()
+        _LOGGER.info(f"[{self.endpoint.host}] Modbus proxy started, listening on 0.0.0.0:{self.config.proxy_port}")
 
     async def setup(self):
         try:
             self.endpoint = await EndPointProvider(self.config).init()
+            if self.config.proxy_enabled:
+                await self._start_proxy()
             self.modbus = Solarman(*self.endpoint.connection)
             self.profile = await ProfileProvider(self.config, self.endpoint).init(self.get)
         except Exception as e:
@@ -60,6 +72,9 @@ class Device():
         self.state.value = -1
         if self.modbus:
             await self.modbus.close()
+        if self._proxy:
+            await self._proxy.stop()
+            self._proxy = None
 
     async def execute(self, code, address, **kwargs):
         _LOGGER.debug(f"[{self.endpoint.host}] Request {code:02} ❘ 0x{code:02X} ~ {address:04} ❘ 0x{address:04X}: {kwargs}")

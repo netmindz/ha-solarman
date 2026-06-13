@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import section, AbortFlow
 from homeassistant.config_entries import DEFAULT_DISCOVERY_UNIQUE_ID, ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.helpers import config_validation as cv, device_registry as dr
-from homeassistant.helpers.selector import SelectSelector, SelectSelectorConfig
+from homeassistant.helpers.selector import BooleanSelector, SelectSelector, SelectSelectorConfig
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from homeassistant.helpers.typing import DiscoveryInfoType
 
@@ -31,6 +31,8 @@ CONFIGURATION_SCHEMA = {
     vol.Optional(CONF_PORT, default = DEFAULT_[CONF_PORT], description = {SUGGESTED_VALUE: DEFAULT_[CONF_PORT]}): cv.port,
     vol.Optional(CONF_TRANSPORT, default = DEFAULT_[CONF_TRANSPORT], description = {SUGGESTED_VALUE: DEFAULT_[CONF_TRANSPORT]}): SelectSelector(SelectSelectorConfig(options = ["tcp", "modbus_tcp", "modbus_rtu"], mode = "dropdown", translation_key = "transport")),
     vol.Optional(CONF_LOOKUP_FILE, default = DEFAULT_[CONF_LOOKUP_FILE], description = {SUGGESTED_VALUE: DEFAULT_[CONF_LOOKUP_FILE]}): str,
+    vol.Optional(CONF_PROXY_ENABLED, default = DEFAULT_[CONF_PROXY_ENABLED]): BooleanSelector(),
+    vol.Optional(CONF_PROXY_PORT, default = DEFAULT_[CONF_PROXY_PORT], description = {SUGGESTED_VALUE: DEFAULT_[CONF_PROXY_PORT]}): cv.port,
     vol.Required(CONF_ADDITIONAL_OPTIONS): section(
         vol.Schema({
             vol.Optional(CONF_MOD, default = DEFAULT_[CONF_MOD], description = {SUGGESTED_VALUE: DEFAULT_[CONF_MOD]}): vol.All(vol.Coerce(int), vol.Range(min = 0, max = 2)),

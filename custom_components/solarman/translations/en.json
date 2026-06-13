@@ -19,14 +19,18 @@
           "host": "Hostname or IP address",
           "port": "Port",
           "transport": "Transport protocol",
-          "lookup_file": "Profile"
+          "lookup_file": "Profile",
+          "proxy_enabled": "Enable Modbus proxy",
+          "proxy_port": "Proxy listen port"
         },
         "data_description": {
           "name": "This name will be prefixed to all sensors (change as you like)",
           "host": "Hostname or IP address of the device to connect to",
           "port": "Port (8899) of the device to connect to",
           "transport": "Transport protocol used during communication with the device",
-          "lookup_file": "The yaml file containing inverter parameter definitions"
+          "lookup_file": "The yaml file containing inverter parameter definitions",
+          "proxy_enabled": "Start a Modbus TCP proxy so multiple clients can share the single inverter connection (requires Modbus TCP transport)",
+          "proxy_port": "Port the proxy listens on for all network interfaces (default 1502)"
         },
         "sections": {
           "additional_options": {
@@ -59,13 +63,17 @@
           "host": "Hostname or IP address",
           "port": "Port",
           "transport": "Transport protocol",
-          "lookup_file": "Profile"
+          "lookup_file": "Profile",
+          "proxy_enabled": "Enable Modbus proxy",
+          "proxy_port": "Proxy listen port"
         },
         "data_description": {
           "host": "Hostname or IP address of the device to connect to",
           "port": "Port (8899) of the device to connect to",
           "transport": "Transport protocol used during communication with the device",
-          "lookup_file": "The yaml file containing inverter parameter definitions"
+          "lookup_file": "The yaml file containing inverter parameter definitions",
+          "proxy_enabled": "Start a Modbus TCP proxy so multiple clients can share the single inverter connection (requires Modbus TCP transport)",
+          "proxy_port": "Port the proxy listens on for all network interfaces (default 1502)"
         },
         "sections": {
           "additional_options": {

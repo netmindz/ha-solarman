@@ -10,6 +10,6 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/davidrapan/ha-solarman/issues",
   "quality_scale": "custom",
-  "requirements": ["aiofiles"],
+  "requirements": ["aiofiles", "modbus-proxy>=0.8.0"],
   "version": "0.0.0"
 }

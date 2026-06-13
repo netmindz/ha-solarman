@@ -54,6 +54,14 @@ class ConfigurationProvider:
         return self._additional_options.get(CONF_MB_SLAVE_ID, DEFAULT_[CONF_MB_SLAVE_ID])
 
     @cached_property
+    def proxy_enabled(self) -> bool:
+        return self._options.get(CONF_PROXY_ENABLED, DEFAULT_[CONF_PROXY_ENABLED])
+
+    @cached_property
+    def proxy_port(self) -> int:
+        return self._options.get(CONF_PROXY_PORT, DEFAULT_[CONF_PROXY_PORT])
+
+    @cached_property
     def directory(self):
         return self.hass.config.path(LOOKUP_DIRECTORY_PATH)
 
@@ -73,6 +81,8 @@ class EndPointProvider:
 
     @cached_property
     def connection(self) -> tuple[str, int, str, int, int, int]:
+        if self.proxy_enabled:
+            return "127.0.0.1", self.proxy_port, self.transport, self.serial, self.mb_slave_id, TIMINGS_INTERVAL
         return self.host, self.port, self.transport, self.serial, self.mb_slave_id, TIMINGS_INTERVAL
 
     @cached_property
