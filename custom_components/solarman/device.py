@@ -47,7 +47,7 @@ class Device():
     async def _start_proxy(self):
         from modbus_proxy import ModBus
         self._proxy = ModBus({
-            "modbus": {"url": f"tcp://{self.endpoint.host}:{self.endpoint.port}"},
+            "modbus": {"url": f"tcp://{self.endpoint.host}:{self.endpoint.port}", "timeout": 10},
             "listen": {"bind": f"tcp://0.0.0.0:{self.config.proxy_port}"}
         })
         await self._proxy.start()
@@ -55,11 +55,18 @@ class Device():
 
     async def setup(self):
         try:
+            _LOGGER.debug(f"[{self.config.name}] Setup: discovering endpoint")
             self.endpoint = await EndPointProvider(self.config).init()
+            _LOGGER.debug(f"[{self.endpoint.host}] Setup: endpoint ready (transport={self.config.transport}, port={self.endpoint.port})")
             if self.config.proxy_enabled:
+                _LOGGER.debug(f"[{self.endpoint.host}] Setup: starting proxy on port {self.config.proxy_port}")
                 await self._start_proxy()
-            self.modbus = Solarman(*self.endpoint.connection)
+            conn = self.endpoint.connection
+            _LOGGER.debug(f"[{self.endpoint.host}] Setup: Solarman connecting to {conn[0]}:{conn[1]} via {'proxy' if self.config.proxy_enabled else 'direct'}")
+            self.modbus = Solarman(*conn)
+            _LOGGER.debug(f"[{self.endpoint.host}] Setup: loading profile")
             self.profile = await ProfileProvider(self.config, self.endpoint).init(self.get)
+            _LOGGER.debug(f"[{self.endpoint.host}] Setup: complete")
         except Exception as e:
             raise type(e)(f"{"Timeout" if (x := isinstance(e, TimeoutError)) else "Error"} setuping {self.config.name}{"" if x else f": {strepr(e)}"}") from e
         else:
@@ -78,6 +85,10 @@ class Device():
                 await asyncio.wait_for(self._proxy.stop(), timeout=5.0)
             except asyncio.TimeoutError:
                 _LOGGER.warning(f"[{self.endpoint.host}] Modbus proxy stop timed out, forcing close")
+                try:
+                    await asyncio.wait_for(self._proxy.close(), timeout=2.0)
+                except Exception:
+                    pass
             self._proxy = None
 
     async def execute(self, code, address, **kwargs):

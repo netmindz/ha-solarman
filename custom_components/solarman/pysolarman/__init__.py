@@ -211,6 +211,7 @@ class Solarman:
 
     @throttle(0.2)
     async def _open_connection(self) -> None:
+        _LOGGER.debug(f"[{self.host}] Connecting to {self.host}:{self.port}")
         try:
             self._reader, self._writer = await asyncio.wait_for(asyncio.open_connection(self.host, self.port), self.timeout)
             self._keeper = create_task(self._keeper_loop())
@@ -220,6 +221,7 @@ class Solarman:
             else:
                 _LOGGER.debug(f"[{self.host}] Successful connection!")
         except Exception as e:
+            _LOGGER.debug(f"[{self.host}] Connection to {self.host}:{self.port} failed: {e!r}")
             if self._last_frame is None:
                 raise ConnectionError("Cannot open connection") from e
             await self._open_connection()
@@ -255,10 +257,13 @@ class Solarman:
 
         try:
             await self._write(frame)
+            attempts = 0
             while True:
                 try:
                     return await asyncio.wait_for(self._data_queue.get(), self.timeout * 3 - 1)
                 except TimeoutError:
+                    attempts += 1
+                    _LOGGER.debug(f"[{self.host}] No response from data queue (attempt {attempts}), closing and retrying")
                     await self._close()
         finally:
             self._data_event.clear()
