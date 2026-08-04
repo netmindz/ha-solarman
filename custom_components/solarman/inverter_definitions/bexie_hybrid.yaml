@@ -21,7 +21,12 @@
 #   5. Writable control registers added (0x2100+): Work Mode (select),
 #      Grid Charge (switch), Grid Charge End SOC (number). Not present in CHINT profile.
 #   6. Inverter Mode sensor added (0x101D). Not present in CHINT profile.
-#   7. No device info block (0x1A00+) — not confirmed available on this device.
+#   7. Device info block at 0x1A00+ confirmed on this device, offsets match
+#      CHINT exactly. "Device Protocol Version" (CHINT: 0x1A1C, rule 7) is
+#      omitted here — that register overlaps the start of Master Software
+#      Version and decodes to garbage when nibble-split. CHINT's "EMS
+#      firmware" fields are named "CSB" here per the Bexie app's own naming
+#      for the same registers.
 #   8. No EPS group — not available on this model.
 #   9. No fault registers — 0x101E–0x1020 and 0x2013 not yet confirmed on this device.
 #  10. Default update_interval is 30 s (CHINT uses 60 s).
@@ -36,6 +41,150 @@ default:
   digits: 6
 
 parameters:
+  - group: info
+    update_interval: 3600
+    items:
+      - name: "Device"
+        rule: 5 # ASCII String
+        registers:
+          [
+            0x1A00,
+            0x1A01,
+            0x1A02,
+            0x1A03,
+            0x1A04,
+            0x1A05,
+            0x1A06,
+            0x1A07,
+            0x1A08,
+            0x1A09,
+            0x1A0A,
+            0x1A0B,
+            0x1A0C,
+            0x1A0D,
+            0x1A0E,
+            0x1A0F,
+          ]
+        icon: "mdi:information"
+        attributes:
+          [
+            "Device Serial Number",
+            "Master Software Version",
+            "Master Software Build Date",
+            "Slave Firmware Version",
+            "Slave Firmware Build Date",
+            "Device MPPTs",
+            "Device Rated Voltage",
+            "Device Rated Frequency",
+            "Device Rated Power",
+            "Device Phases",
+            "Production Type",
+            "CSB Firmware Version",
+            "CSB Firmware Build Date",
+            "DCDC Firmware Version",
+            "DCDC Firmware Build Date",
+          ]
+
+      - name: "Device Serial Number"
+        attribute:
+        rule: 5 # ASCII String
+        registers:
+          [0x1A10, 0x1A11, 0x1A12, 0x1A13, 0x1A14, 0x1A15, 0x1A16, 0x1A17]
+
+      - name: "Master Software Version"
+        attribute:
+        rule: 5 # ASCII String
+        registers: [0x1A1C, 0x1A1D, 0x1A1E]
+
+      - name: "Master Software Build Date"
+        attribute:
+        rule: 5 # ASCII String
+        registers: [0x1A23, 0x1A24, 0x1A25]
+
+      - name: "Slave Firmware Version"
+        attribute:
+        rule: 5 # ASCII String
+        registers: [0x1A26, 0x1A27, 0x1A28]
+
+      - name: "Slave Firmware Build Date"
+        attribute:
+        rule: 5 # ASCII String
+        registers: [0x1A2D, 0x1A2E, 0x1A2F]
+
+      - name: "Device MPPTs"
+        attribute:
+        rule: 1 # unsigned data
+        registers: [0x1A3B]
+
+      - name: "Device Rated Voltage"
+        attribute:
+        class: "voltage"
+        state_class: "measurement"
+        uom: "V"
+        scale: 0.1
+        rule: 1
+        registers: [0x1A44]
+
+      - name: "Device Rated Frequency"
+        attribute:
+        class: "frequency"
+        state_class: "measurement"
+        uom: "Hz"
+        scale: 0.01
+        rule: 1
+        registers: [0x1A45]
+
+      - name: "Device Rated Power"
+        attribute:
+        class: "power"
+        state_class: "measurement"
+        uom: "W"
+        scale: 1
+        rule: 1
+        registers: [0x1A46]
+
+      - name: "Device Phases"
+        attribute:
+        rule: 1
+        registers: [0x1A48]
+
+      - name: "Production Type"
+        attribute:
+        class: "enum"
+        rule: 1
+        registers: [0x1A5A]
+        lookup:
+          - key: 0x0000
+            value: "On grid"
+          - key: [0x0001]
+            value: "AC couple no smart load"
+          - key: [0x0002]
+            value: "Hybrid no smart load"
+          - key: [0x0003]
+            value: "Hybrid with smart load"
+          - key: [0x0004]
+            value: "AC couple with smart load"
+
+      - name: "CSB Firmware Version"
+        attribute:
+        rule: 5 # ASCII String
+        registers: [0x1A60, 0x1A61, 0x1A62]
+
+      - name: "CSB Firmware Build Date"
+        attribute:
+        rule: 5 # ASCII String
+        registers: [0x1A67, 0x1A68, 0x1A69]
+
+      - name: "DCDC Firmware Version"
+        attribute:
+        rule: 5 # ASCII String
+        registers: [0x1A6F, 0x1A70, 0x1A71]
+
+      - name: "DCDC Firmware Build Date"
+        attribute:
+        rule: 5 # ASCII String
+        registers: [0x1A76, 0x1A77, 0x1A78]
+
   - group: PV
     items:
       - name: "PV Power"
