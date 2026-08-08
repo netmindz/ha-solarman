@@ -26,7 +26,9 @@
 #      omitted here — that register overlaps the start of Master Software
 #      Version and decodes to garbage when nibble-split. CHINT's "EMS
 #      firmware" fields are named "CSB" here per the Bexie app's own naming
-#      for the same registers.
+#      for the same registers. "Device" (0x1A00+) decodes to "BE6KW-1PH" on
+#      this unit — the SKU string, not a manufacturer name; do not assume
+#      other Bexie models share this prefix.
 #   8. No EPS group — not available on this model.
 #   9. No fault registers — 0x101E–0x1020 and 0x2013 not yet confirmed on this device.
 #  10. Default update_interval is 30 s (CHINT uses 60 s).
@@ -35,6 +37,16 @@
 info:
   manufacturer: Bexie
   model: Hybrid
+
+# Lets "Auto" profile selection identify this device: reads the "Device" ASCII block
+# below (0x1A00-0x1A0F) and matches on the exact SKU string confirmed on real hardware.
+# CHINT CPS-SCETL shares this same register block but reports a different string, so an
+# exact match (not a prefix/substring match) is required to tell the two apart.
+autodetection:
+  code: 0x03
+  start: 0x1A00
+  end: 0x1A0F
+  equals: "BE6KW-1PH"
 
 default:
   update_interval: 30
