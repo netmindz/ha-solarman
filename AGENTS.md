@@ -15,12 +15,14 @@ A device profile has been created at:
 
 | Field       | Value                  |
 |-------------|------------------------|
-| IP          | 192.168.178.134        |
-| Port        | 502                    |
+| Host        | `mass`                 |
+| Port        | 1502                   |
 | Protocol    | Modbus TCP             |
 | Phases      | Single phase           |
 | MPPTs       | 2                      |
 | HA instance | 192.168.178.231:8123   |
+
+`mass:1502` is the current known-good address (previously documented as `192.168.178.134:502` — IP/port can drift, `mass` is the stable hostname to use going forward).
 
 ### Register Map (confirmed via live probe)
 
@@ -46,7 +48,10 @@ A device profile has been created at:
 
 ### Tools
 
-- `tools/probe_registers.py` — reads and validates all key registers, flags implausible values. Run with:
+Check this section before asking the user how to test against the real device — no need to prompt for connection details or write a one-off Modbus script.
+
+- `tools/probe_registers.py` — reads and validates all key registers on the live Bexie device, flags implausible values, and is useful for confirming/refuting a register-decode hypothesis (e.g. word order, sign, overflow) against real hardware rather than guessing from datasheet notes alone. Run with:
   ```
-  python3 tools/probe_registers.py --host 192.168.178.134
+  python3 tools/probe_registers.py --host mass --port 1502
   ```
+  (defaults to `--host 192.168.178.134 --port 502` if omitted — pass `--host mass --port 1502` explicitly, that's the current known-good address).
