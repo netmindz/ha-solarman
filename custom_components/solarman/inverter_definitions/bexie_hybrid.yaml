@@ -9,15 +9,14 @@
 # Notes:
 #   - 32-bit registers use inverted word order: [high_addr, low_addr] (same as CHINT)
 #   - Battery Temperature: 0x201B confirmed (0x2001 returns 0 on this device)
-#   - Battery Power: 0x200A/0x2009 pair confirmed (781W @ 52.7V / 14.81A) —
-#     but that data point only confirms the low word (0x200A) since the
-#     magnitude was small. Reading 0x200A alone as signed 16 (rule 2) is known
-#     to overflow above 3276.7W, which flips the sign and misreports high-power
-#     discharge as charging (seen under Feed-in Priority, where discharge can
-#     exceed typical Self Use draw). Changed to read the signed 32-bit pair
-#     (rule 4); this assumes 0x2009 is a genuine high word including sign
-#     extension while charging — not yet confirmed against a real charging
-#     sample, so re-check if charging readings look wrong after this change.
+#   - Battery Power: 0x200A/0x2009 pair confirmed (781W @ 52.7V / 14.81A).
+#     Reading 0x200A alone as signed 16 (rule 2) overflows above 3276.7W,
+#     flipping the sign and misreporting high-power discharge as charging —
+#     reproduced live under Feed-in Priority (5397W discharge, confirmed via
+#     Battery Current x Voltage, read back as -1156.6W under the old rule 2
+#     definition; 0x2009 read 0x0000, the expected high word for a value that
+#     fits in the low 16 bits). Fixed by reading the signed 32-bit pair
+#     (rule 4), matching Battery Current's pattern.
 #
 # Differences from CHINT CPS-SCETL:
 #   1. Single phase only — no L1/L2/L3 output, grid current, or per-phase load entities.
